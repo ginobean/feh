@@ -33,23 +33,42 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "signals.h"
 #include "wallpaper.h"
 #include <termios.h>
+#include <stdbool.h>
 
 #ifdef HAVE_INOTIFY
 #include <sys/inotify.h>
 #endif
 
+
+#define MYLOG_CATEGORY_NAME "root.feh"
+#include "mylog.h"
+
+
 char **cmdargv = NULL;
 int cmdargc = 0;
 char *mode = NULL;
+
+static bool initialized_mylog = false;
 
 int main(int argc, char **argv)
 {
 	atexit(feh_clean_exit);
 
+	if (mylog_init() == 0) {
+	    initialized_mylog = true;
+	}
+	else {
+	    printf("mylog_init() failed");
+	    exit(-1);
+	}
+
+	MYLOGMSG(LOG4C_PRIORITY_DEBUG, "(log4c initialized)");
+
 	srandom(getpid() * time(NULL) % ((unsigned int) -1));
 
 	setup_signal_handlers();
 	init_parse_options(argc, argv);
+
 
 	init_imlib_fonts();
 
@@ -237,13 +256,21 @@ int feh_main_iteration(int block)
 	}
 	if (window_num == 0 || sig_exit != 0)
 		return(0);
-	
+
 	return(1);
 }
 
 void feh_clean_exit(void)
 {
 	delete_rm_files();
+
+	if (initialized_mylog) {
+	    /* Explicitly call the log4c cleanup routine */
+	    MYLOGMSG(LOG4C_PRIORITY_DEBUG, "(log4c cleanup)");
+	    if (mylog_fini()) {
+		printf("mylog_fini() failed");
+	    }
+	}
 
 	free(opt.menu_font);
 

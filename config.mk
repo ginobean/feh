@@ -101,4 +101,4 @@ MAN_DATE ?= ${shell date '+%B %d, %Y'}
 CFLAGS += -DPREFIX=\"${PREFIX}\" \
 	-DPACKAGE=\"${PACKAGE}\" -DVERSION=\"${VERSION}\"
 
-LDLIBS += -lm -lpng -lX11 -lImlib2
+LDLIBS += -lm -lpng -lX11 -lImlib2 -llog4c
