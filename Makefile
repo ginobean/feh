@@ -23,7 +23,7 @@ test-x11: all
 	prove test/feh-bg-i.t
 
 install: install-man install-doc install-bin install-font install-img
-install: install-icon install-examples install-applications
+install: install-icon install-examples
 
 install-man:
 	@echo installing manuals to ${man_dir}
