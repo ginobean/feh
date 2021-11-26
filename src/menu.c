@@ -1,7 +1,7 @@
 /* menu.c
 
 Copyright (C) 1999-2003 Tom Gilbert.
-Copyright (C) 2010-2018 Daniel Friesel.
+Copyright (C) 2010-2020 Daniel Friesel.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to
@@ -80,6 +80,8 @@ enum {
 	CB_OPT_FREEZE_WINDOW,
 	CB_OPT_FULLSCREEN,
 	CB_EDIT_ROTATE,
+	CB_EDIT_MIRROR,
+	CB_EDIT_FLIP,
 	CB_OPT_AUTO_ZOOM,
 	CB_OPT_KEEP_ZOOM_VP
 };
@@ -920,7 +922,12 @@ void feh_menu_init_main(void)
 	feh_menu_add_entry(m, "Reload", NULL, CB_RELOAD, 0, NULL);
 	feh_menu_add_entry(m, "Save Image", NULL, CB_SAVE_IMAGE, 0, NULL);
 	feh_menu_add_entry(m, "Save List", NULL, CB_SAVE_FILELIST, 0, NULL);
-	feh_menu_add_entry(m, "Edit in Place", "EDIT", 0, 0, NULL);
+	if (opt.edit) {
+		feh_menu_add_entry(m, "Edit in Place", "EDIT", 0, 0, NULL);
+	}
+	else {
+		feh_menu_add_entry(m, "Change View", "EDIT", 0, 0, NULL);
+	}
 	feh_menu_add_entry(m, "Background", "BACKGROUND", 0, 0, NULL);
 	feh_menu_add_entry(m, NULL, NULL, 0, 0, NULL);
 	feh_menu_add_entry(m, "Hide", NULL, CB_REMOVE, 0, NULL);
@@ -963,6 +970,8 @@ void feh_menu_init_common()
 	feh_menu_add_entry(m, "Rotate 90 CW", NULL, CB_EDIT_ROTATE, 1, NULL);
 	feh_menu_add_entry(m, "Rotate 180", NULL, CB_EDIT_ROTATE, 2, NULL);
 	feh_menu_add_entry(m, "Rotate 90 CCW", NULL, CB_EDIT_ROTATE, 3, NULL);
+	feh_menu_add_entry(m, "Mirror", NULL, CB_EDIT_MIRROR, 0, NULL);
+	feh_menu_add_entry(m, "Flip", NULL, CB_EDIT_FLIP, 0, NULL);
 
 	menu_bg = feh_menu_new();
 	menu_bg->name = estrdup("BACKGROUND");
@@ -1308,6 +1317,12 @@ void feh_menu_cb(feh_menu * m, feh_menu_item * i, int action, unsigned short dat
 			break;
 		case CB_EDIT_ROTATE:
 			feh_edit_inplace(m->fehwin, data);
+			break;
+		case CB_EDIT_MIRROR:
+			feh_edit_inplace(m->fehwin, INPLACE_EDIT_MIRROR);
+			break;
+		case CB_EDIT_FLIP:
+			feh_edit_inplace(m->fehwin, INPLACE_EDIT_FLIP);
 			break;
 		case CB_SAVE_IMAGE:
 			slideshow_save_image(m->fehwin);

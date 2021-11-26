@@ -1,7 +1,7 @@
 /* events.c
 
 Copyright (C) 1999-2003 Tom Gilbert.
-Copyright (C) 2010-2018 Daniel Friesel.
+Copyright (C) 2010-2020 Daniel Friesel.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to
@@ -85,6 +85,15 @@ static void feh_set_parse_bb_partial(fehkey *button, char *binding)
 
 	button->button = atoi(cur);
 	button->state  = mod;
+
+	if (button->button == 0) {
+		/*
+		 * Mod3 is unused on today's keyboards. If Mod3 is unset and button==0,
+		 * we are dealing with an uninitialized or unset binding. If Mod3 is set
+		 * and button==0, it refers to mouse movement.
+		 */
+		button->state |= Mod3Mask;
+	}
 }
 
 /*
@@ -255,7 +264,7 @@ static void feh_event_handle_ButtonPress(XEvent * ev)
 				- winwid->im_y) / winwid->old_zoom;
 
 		/* copied from zoom_in, keyevents.c */
-		winwid->zoom = winwid->zoom * 1.25;
+		winwid->zoom = winwid->zoom * opt.zoom_rate;
 
 		if (winwid->zoom > ZOOM_MAX)
 			winwid->zoom = ZOOM_MAX;
@@ -283,7 +292,7 @@ static void feh_event_handle_ButtonPress(XEvent * ev)
 				- winwid->im_y) / winwid->old_zoom;
 
 		/* copied from zoom_out, keyevents.c */
-		winwid->zoom = winwid->zoom * 0.80;
+		winwid->zoom = winwid->zoom / opt.zoom_rate;
 
 		if (winwid->zoom < ZOOM_MIN)
 			winwid->zoom = ZOOM_MIN;
@@ -632,12 +641,14 @@ static void feh_event_handle_MotionNotify(XEvent * ev)
 				Imlib_Image temp;
 
 				temp = gib_imlib_create_rotated_image(winwid->im, 0.0);
-				winwid->im_w = gib_imlib_image_get_width(temp);
-				winwid->im_h = gib_imlib_image_get_height(temp);
-				gib_imlib_free_image_and_decache(temp);
-				if (!winwid->full_screen && !opt.geom_flags)
-					winwidget_resize(winwid, winwid->im_w, winwid->im_h, 0);
-				winwid->has_rotated = 1;
+				if (temp != NULL) {
+					winwid->im_w = gib_imlib_image_get_width(temp);
+					winwid->im_h = gib_imlib_image_get_height(temp);
+					gib_imlib_free_image_and_decache(temp);
+					if (!winwid->full_screen && !opt.geom_flags)
+						winwidget_resize(winwid, winwid->im_w, winwid->im_h, 0);
+					winwid->has_rotated = 1;
+				}
 			}
 			winwid->im_angle = (ev->xmotion.x - winwid->w / 2) / ((double) winwid->w / 2) * 3.1415926535;
 			D(("angle: %f\n", winwid->im_angle));
@@ -653,17 +664,19 @@ static void feh_event_handle_MotionNotify(XEvent * ev)
 			D(("Blurring\n"));
 
 			temp = gib_imlib_clone_image(winwid->im);
-			blur_radius = (((double) ev->xmotion.x / winwid->w) * 20) - 10;
-			D(("angle: %d\n", blur_radius));
-			if (blur_radius > 0)
-				gib_imlib_image_sharpen(temp, blur_radius);
-			else
-				gib_imlib_image_blur(temp, 0 - blur_radius);
-			ptr = winwid->im;
-			winwid->im = temp;
-			winwidget_render_image(winwid, 0, 1);
-			gib_imlib_free_image_and_decache(winwid->im);
-			winwid->im = ptr;
+			if (temp != NULL) {
+				blur_radius = (((double) ev->xmotion.x / winwid->w) * 20) - 10;
+				D(("angle: %d\n", blur_radius));
+				if (blur_radius > 0)
+					gib_imlib_image_sharpen(temp, blur_radius);
+				else
+					gib_imlib_image_blur(temp, 0 - blur_radius);
+				ptr = winwid->im;
+				winwid->im = temp;
+				winwidget_render_image(winwid, 0, 1);
+				gib_imlib_free_image_and_decache(winwid->im);
+				winwid->im = ptr;
+			}
 		}
 	} else {
 		while (XCheckTypedWindowEvent(disp, ev->xmotion.window, MotionNotify, ev));
@@ -676,6 +689,8 @@ static void feh_event_handle_MotionNotify(XEvent * ev)
 			y = (ev->xbutton.y - winwid->im_y) / winwid->zoom;
 			thumbnail = feh_thumbnail_get_thumbnail_from_coords(x, y);
 			feh_thumbnail_select(winwid, thumbnail);
+		} else {
+			feh_event_handle_generic(winwid, ev->xmotion.state | Mod3Mask, NoSymbol, 0);
 		}
 	}
 	return;

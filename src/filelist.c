@@ -1,7 +1,7 @@
 /* filelist.c
 
 Copyright (C) 1999-2003 Tom Gilbert.
-Copyright (C) 2010-2018 Daniel Friesel.
+Copyright (C) 2010-2020 Daniel Friesel.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to
@@ -24,14 +24,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-#ifdef HAVE_LIBEXIF
-#include <libexif/exif-data.h>
-#endif
-
 #include "feh.h"
 #include "filelist.h"
 #include "signals.h"
 #include "options.h"
+
+#ifdef HAVE_LIBCURL
+#include <curl/curl.h>
+#endif
 
 gib_list *filelist = NULL;
 gib_list *original_file_items = NULL; /* original file items from argv */
@@ -198,7 +198,7 @@ void add_file_to_filelist_recursively(char *origpath, unsigned char level)
 	struct stat st;
 	char *path;
 
-	if (!origpath)
+	if (!origpath || *origpath == '\0')
 		return;
 
 	path = estrdup(origpath);
@@ -398,11 +398,10 @@ void feh_file_dirname(char *dst, feh_file * f, int maxlen)
 		return;
 	}
 
-	strncpy(dst, f->filename, n);
+	memcpy(dst, f->filename, n);
 	dst[n] = '\0';
 }
 
-#ifdef HAVE_VERSCMP
 static inline int strcmp_or_strverscmp(const char *s1, const char *s2)
 {
 	if (!opt.version_sort)
@@ -410,9 +409,6 @@ static inline int strcmp_or_strverscmp(const char *s1, const char *s2)
 	else
 		return(strverscmp(s1, s2));
 }
-#else
-#define strcmp_or_strverscmp strcmp
-#endif
 
 int feh_cmp_filename(void *file1, void *file2)
 {
@@ -650,7 +646,8 @@ char *feh_absolute_path(char *path)
 	   path you give it is relative. Linux and BSD get this right... */
 	if (getcwd(cwd, sizeof(cwd)) == NULL)
 		eprintf("Cannot determine working directory:");
-	snprintf(temp, sizeof(temp), "%s/%s", cwd, path);
+	if ((size_t) snprintf(temp, sizeof(temp), "%s/%s", cwd, path) >= sizeof(temp))
+		eprintf("Absolute path for working directory was truncated");
 	if (realpath(temp, fullpath) != NULL) {
 		ret = estrdup(fullpath);
 	} else {
@@ -663,8 +660,17 @@ char *feh_absolute_path(char *path)
 void feh_save_filelist()
 {
 	char *tmpname;
+	char *base_dir = "";
 
-	tmpname = feh_unique_filename("", "filelist");
+	if (opt.output_dir) {
+		base_dir = estrjoin("", opt.output_dir, "/", NULL);
+	}
+
+	tmpname = feh_unique_filename(base_dir, "filelist");
+
+	if (opt.output_dir) {
+		free(base_dir);
+	}
 
 	if (opt.verbose)
 		fprintf(stderr, "saving filelist to filename '%s'\n", tmpname);
@@ -673,3 +679,27 @@ void feh_save_filelist()
 	free(tmpname);
 	return;
 }
+
+#ifdef HAVE_LIBCURL
+
+char *feh_http_unescape(char *url)
+{
+	CURL *curl = curl_easy_init();
+	if (!curl) {
+		return NULL;
+	}
+	char *tmp_url = curl_easy_unescape(curl, url, 0, NULL);
+	char *new_url = estrdup(tmp_url);
+	curl_free(tmp_url);
+	curl_easy_cleanup(curl);
+	return new_url;
+}
+
+#else
+
+char *feh_http_unescape(char *url)
+{
+	return NULL;
+}
+
+#endif

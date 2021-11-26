@@ -1,3 +1,122 @@
+Sat, 25 Sep 2021 09:21:25 +0200  Daniel Friesel <derf+feh@finalrewind.org>
+
+* Release v3.7.2
+    * Fix crash when running feh without stdin file descriptor
+
+Sat, 24 Jul 2021 22:30:12 +0200  Daniel Friesel <derf+feh@finalrewind.org>
+
+* Release v3.7.1
+    * Support JPEG XL files when using imlib2-jxl (patch by Alistair)
+    * Fix support for images smaller than 16 bytes (patch by David Buchanan)
+    * Fix some out of bounds reads (patches by Tobias Stoeckmann)
+
+Sun, 09 May 2021 11:31:55 +0200  Daniel Friesel <derf+feh@finalrewind.org>
+
+* Release v3.7
+    * Use compact representation instead of key-value pairs for common EXIF data
+      (only applies when compiling feh with exif=1)
+    * Add --window-id <windowid> option (draw to an existing window)
+    * Add --zoom-step <percent> option (specify zoom step size)
+    * Pass gopher:// and gophers:// URLs to libcurl
+    * Fix --reload / --auto-reload reloading the wrong directory when
+      using --start-at and no file arguments or filelists have been
+      specified
+    * Fix Ctrl+key causing unintended behaviour when controlling feh via stdin
+    * Fix high CPU usage when closing stdin after starting feh from a terminal
+
+Mon, 25 Jan 2021 17:46:57 +0100  Daniel Friesel <derf+feh@finalrewind.org>
+
+* Release v3.6.3
+    * Fix --start-at not handling URL-encoded file:/// paths properly. Notably,
+      this also fixes feh not displaying images with spaces or unicode
+      elements in their path when opened from a file manager.
+
+Sat, 09 Jan 2021 12:28:06 +0100  Daniel Friesel <derf+feh@finalrewind.org>
+
+* Release v3.6.2
+    * Fix save_filelist not respecting --output-dir
+    * Fix file descriptor leak when attempting to load truncated image files.
+      The issue was introduced in v3.6.
+
+Sun, 06 Dec 2020 08:34:15 +0100  Daniel Friesel <derf+feh@finalrewind.org>
+
+* Release v3.6.1
+    * Fix excessive memory consumption when showing long-running slideshows
+      with thousands to tens of thousands of images and feh has been compiled
+      with exif=1 (see https://github.com/derf/feh/issues/553)
+    * Fix memory leak when showing long-running slideshows with relatively few
+      images and feh has been compiled with exif=1 (ibid.)
+    * Fix memory leak when reloading an image and feh has been compiled with
+      exif=1
+    * Fix memory leak in --draw-exif
+    * Fix memory leak when reloading HTTP files with --no-conversion-cache
+
+Mon, 30 Nov 2020 19:44:47 +0100  Daniel Friesel <derf+feh@finalrewind.org>
+
+* Release v3.6
+    * Add flip and rotate options to the menu
+    * Improve unloadable image detection time (e.g. for large video files) by
+      checking a file's header before passing it to Imlib2. For rarely used
+      image formats, there is a very small chance that an image which could be
+      loaded by feh 3.5 is reported as unloadable by feh 3.6 due to this
+      change. Set FEH_SKIP_MAGIC=1 to bypass the header check in this case. See
+      <https://phab.enlightenment.org/T8739> and
+      <https://github.com/derf/feh/issues/505> for details.
+
+
+Sat, 29 Aug 2020 08:49:08 +0200  Daniel Friesel <derf+feh@finalrewind.org>
+
+* Release v3.5
+    * Enable --version-sort on systems without strverscmp support. This
+      works by bundling the strverscmp of musl libc with feh and using it
+      when feh is compiled without the verscmp flag (i.e., when the system
+      libc does not provide the verscmp function). Patch by Tim van der Molen
+    * Add %a format specifier (slideshow state: "playing" / "paused")
+    * Fix crashes when combining --reload and --multiwindow
+
+Fri, 29 May 2020 23:52:35 +0200  Daniel Friesel <derf+feh@finalrewind.org>
+
+* Release v3.4.1
+    * Fix lossless rotate not being lossless when using feh with Imlib2 v1.6
+      or later
+
+Sat, 11 Apr 2020 09:51:01 +0200  Daniel Friesel <derf+feh@finalrewind.org>
+
+* Release v3.4
+    * Images loaded via HTTPS/curl, ImageMagick, and dcraw are now cached
+      by default to decrease image load time on subsequent slideshow passes.
+      Caching is disabled when using `--reload` and can also be disabled with
+      the new `--no-conversion-cache` option. Suggestion and initial patch by
+      Awal Garg.
+    * Handle SIGINT/SIGTERM/SIGQUIT signals while loading images using libcurl
+      < v7.32. Patch by <https://github.com/c99pedant>.
+    * "feh --start-at URL" now loads a single-image slideshow displaying URL.
+      This allows feh.desktop to handle URLs as well as ordinary files.
+      file:/// URLs are treated as local files, so "feh --start-at file:///..."
+      without filelist arguments behaves just like "feh --start-at ..."
+      (i.e., feh will load the entire directory and start the slideshow at ...)
+    * Fix a memory leak when repeatedly cycling through slideshows containing
+      images loaded via libcurl, ImageMagick or dcraw.
+
+Tue, 03 Dec 2019 17:27:46 +0100  Daniel Friesel <derf+feh@finalrewind.org>
+
+* Release v3.3
+    * New option --class allows setting the X11 class hint per feh instance
+      (patch by Olof-Joachim Frahm)
+    * Improve handling of NULL returns from Imlib2 calls (patch by Ben Boeckel)
+    * Fix compilation with libcurl < v7.32
+
+Mon, 22 Jul 2019 20:17:03 +0200  Daniel Friesel <derf+feh@finalrewind.org>
+
+* Release v3.2.1
+    * Use --no-fehbg option in ~/.fehbg. This fixes cases where an X11
+      setup change may inadvertently alter the commandline stored in .fehbg.
+    * Fix insufficient error handling when updating ~/.fehbg. Previously,
+      a stat() error may have caused .fehbg to be update with excessive file
+      permissions (patch by Tobias Stoeckmann)
+    * Fix TOCTTOU when setting the file mode of ~/.fehbg
+      (patch by Tobias Stoeckmann)
+
 Wed, 10 Jul 2019 17:40:29 +0200  Daniel Friesel <derf+feh@finalrewind.org>
 
 * Release v3.2

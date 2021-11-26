@@ -1,7 +1,7 @@
 /* feh.h
 
 Copyright (C) 1999-2003 Tom Gilbert.
-Copyright (C) 2010-2018 Daniel Friesel.
+Copyright (C) 2010-2020 Daniel Friesel.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to
@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * strverscmp(3) is a GNU extension. In most supporting C libraries it
  * requires _GNU_SOURCE to be defined.
  */
-#ifdef HAVE_VERSCMP
+#ifdef HAVE_STRVERSCMP
 #define _GNU_SOURCE
 #endif
 
@@ -115,6 +115,14 @@ enum slide_change { SLIDE_NEXT, SLIDE_PREV, SLIDE_RAND, SLIDE_FIRST, SLIDE_LAST,
 	SLIDE_JUMP_PREV_DIR
 };
 
+enum feh_load_error {
+	LOAD_ERROR_IMLIB = 0,
+	LOAD_ERROR_IMAGEMAGICK,
+	LOAD_ERROR_CURL,
+	LOAD_ERROR_DCRAW,
+	LOAD_ERROR_MAGICBYTES
+};
+
 #define INPLACE_EDIT_FLIP   -1
 #define INPLACE_EDIT_MIRROR -2
 
@@ -172,7 +180,7 @@ void feh_display_status(char stat);
 void real_loadables_mode(int loadable);
 void feh_reload_image(winwidget w, int resize, int force_new);
 void feh_filelist_image_remove(winwidget winwid, char do_delete);
-void feh_imlib_print_load_error(char *file, winwidget w, Imlib_Load_Error err);
+void feh_print_load_error(char *file, winwidget w, Imlib_Load_Error err, enum feh_load_error feh_err);
 void slideshow_save_image(winwidget win);
 void feh_edit_inplace(winwidget w, int orientation);
 void feh_edit_inplace_lossless(winwidget w, int orientation);
@@ -181,6 +189,9 @@ char *build_caption_filename(feh_file * file, short create_dir);
 gib_list *feh_list_jump(gib_list * root, gib_list * l, int direction, int num);
 #ifdef HAVE_INOTIFY
 void feh_event_handle_inotify(void);
+#endif
+#ifndef HAVE_STRVERSCMP
+int strverscmp(const char *l0, const char *r0);
 #endif
 
 /* Imlib stuff */
