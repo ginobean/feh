@@ -27,6 +27,11 @@ TARGETS = \
 	wallpaper.c \
 	winwidget.c
 
+CXX = g++
+CXX_SOURCES = $(wildcard *.cpp)
+CXX_OBJECTS = $(patsubst %.cpp,%.o,$(CXX_SOURCES))
+
+
 ifeq (${exif},1)
 	TARGETS += \
 		exif.c \
@@ -40,11 +45,17 @@ endif
 
 OBJECTS = ${TARGETS:.c=.o}
 
+%.o : %.c
+	$(CC) $(CFLAGS) -c "$<" -o "$@"
+
+%.o : %.cpp
+	$(CXX) $(CXXFLAGS) -c "$<" -o "$@"
+
 I_SRCS = ${shell echo *.raw}
 I_DSTS = ${I_SRCS:.raw=.inc}
 
-feh: deps.mk ${OBJECTS} ${I_DSTS}
-	${CC} ${LDFLAGS} ${CFLAGS} -o $@ ${OBJECTS} ${LDLIBS}
+feh: deps.mk ${OBJECTS} ${CXX_OBJECTS} ${I_DSTS}
+	${CXX} ${LDFLAGS} ${CXX_LFLAGS} ${CXXFLAGS} -o $@ ${OBJECTS} ${CXX_OBJECTS} ${LDLIBS}
 
 include deps.mk
 
@@ -55,8 +66,9 @@ fehrc.inc: fehrc.raw
 help.inc: help.raw
 
 # CFLAGS might contain include paths needed to resolve includes in headers
-deps.mk: ${TARGETS} ${I_DSTS}
+deps.mk: ${TARGETS} ${CXX_SOURCES} ${I_DSTS}
 	${CC} ${CFLAGS} -MM ${TARGETS} > $@
+	${CXX} ${CXXFLAGS} -MM ${CXX_SOURCES} >> $@
 
 clean:
 	rm -f feh *.o *.inc

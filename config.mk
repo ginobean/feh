@@ -39,7 +39,9 @@ CFLAGS ?= -g -O2
 CFLAGS += -Wall -Wextra -pedantic
 
 # Settings for glibc >= 2.19 - may need to be adjusted for other systems
-CFLAGS += -std=c11 -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700
+CFLAGS += -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700
+
+
 
 ifeq (${curl},1)
 	CFLAGS += -DHAVE_LIBCURL
@@ -103,4 +105,9 @@ MAN_DATE ?= ${shell date '+%B %d, %Y'}
 CFLAGS += -DPREFIX=\"${PREFIX}\" \
 	-DPACKAGE=\"${PACKAGE}\" -DVERSION=\"${VERSION}\"
 
+CXXFLAGS := ${CFLAGS}
+CFLAGS += -std=c11
+CXXFLAGS += -std=c++11
+
 LDLIBS += -lm -lpng -lX11 -lImlib2 -llog4c
+CXX_LFLAGS=
