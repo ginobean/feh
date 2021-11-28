@@ -107,7 +107,7 @@ CFLAGS += -DPREFIX=\"${PREFIX}\" \
 
 CXXFLAGS := ${CFLAGS}
 CFLAGS += -std=c11
-CXXFLAGS += -std=c++11
+CXXFLAGS += -std=c++11 -Wall -Wno-write-strings
 
 LDLIBS += -lm -lpng -lX11 -lImlib2 -llog4c
 CXX_LFLAGS=
