@@ -24,6 +24,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
+extern "C" {
 #include "feh.h"
 #include "filelist.h"
 #include "winwidget.h"
@@ -39,9 +40,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <sys/inotify.h>
 #endif
 
-
 #define MYLOG_CATEGORY_NAME "root.feh"
 #include "mylog.h"
+
+}
 
 
 char **cmdargv = NULL;

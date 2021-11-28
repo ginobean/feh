@@ -14,7 +14,6 @@ TARGETS = \
 	index.c \
 	keyevents.c \
 	list.c \
-	main.c \
 	md5.c \
 	menu.c \
 	multiwindow.c \
