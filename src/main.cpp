@@ -149,15 +149,6 @@ int main(int argc, char **argv)
 }
 
 
-void initialize_drag_and_drop(winwidget winwid)
-{
-    if (winwid == NULL) {
-        weprintf("no winwidget passed. cannot initialize drag and drop!");
-        return;
-    }
-
-    init_selection_dnd();
-}
 
 
 /* Return 0 to stop iterating, 1 if ok to continue. */
@@ -197,10 +188,8 @@ int feh_main_iteration(winwidget winwid, int block)
 			setup_stdin();
 		}
 
-                if (winwid != NULL) {
-                    update_selection_x_vars(disp, winwid->win);
-                    initialize_drag_and_drop(winwid);
-                }
+        update_selection_x_vars(disp, winwid->win);
+        init_selection_dnd();
 	}
 
 	/* Timers */
