@@ -343,24 +343,6 @@ init_selection_dnd()
 	//actual data. The data consists of a prespecified list of files in the
 	//current or install directory, and the URL of the PNG, in various
 	//incarnations.
-//    string url;
-
-//	typed_data[XA_image_bmp] = read_whole_file("r0x0r.bmp", url);
-//	typed_data[XA_image_jpg] = read_whole_file("r0x0r.jpg", url);
-//	typed_data[XA_image_tiff] = read_whole_file("r0x0r.tiff", url);
-//    (void) read_whole_file("r0x0r.png", url);
-//    url = "file:///data/external/feh/src/r0x0r.png";
-
-//    cerr << "url = " << url << endl;
-
-//	typed_data[XA_text_uri_list] = url;
-//	typed_data[XA_text_uri] = url;
-//	typed_data[XA_text_plain] = url;
-//	typed_data[XA_text] = url;
-//	typed_data[XA_STRING] = url;
-    //We set this, so that TARGETS does not need to be called, as
-    //specified by Xdnd.
-    set_targets_property(disp, window, typed_data, XA_XdndTypeList);
 
 	XFlush(disp);
 }
