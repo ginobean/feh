@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "options.h"
 #include "signals.h"
 
-void init_slideshow_mode(void)
+winwidget init_slideshow_mode(void)
 {
 	winwidget w = NULL;
 	int success = 0;
@@ -121,7 +121,7 @@ void init_slideshow_mode(void)
 	if (!success)
 		show_mini_usage();
 
-	return;
+	return w;
 }
 
 void cb_slide_timer(void *data)
@@ -165,7 +165,7 @@ void cb_reload_timer(void *data)
 		if (opt.filelistfile) {
 			filelist = gib_list_cat(filelist, feh_read_filelist(opt.filelistfile));
 		}
-		
+
 		if (!(filelist_len = gib_list_length(filelist))) {
 			eprintf("No files found to reload.");
 		}

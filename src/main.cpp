@@ -46,14 +46,33 @@ extern "C" {
 }
 
 
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+#include <map>
+#include <iostream>
+#include <cstdio>
+#include <climits>
+#include <cstring>
+
+#include "selection.hpp"
+
+using namespace std;
+
+
 char **cmdargv = NULL;
 int cmdargc = 0;
 char *mode = NULL;
 
 static bool initialized_mylog = false;
 
+
+static map<string, int> datatypes;
+
+
 int main(int argc, char **argv)
 {
+    winwidget winwid = NULL;
+
 	atexit(feh_clean_exit);
 
 	if (mylog_init() == 0) {
@@ -78,6 +97,10 @@ int main(int argc, char **argv)
 		init_x_and_imlib();
 		init_keyevents();
 		init_buttonbindings();
+
+
+
+
 #ifdef HAVE_INOTIFY
         if (opt.auto_reload) {
             opt.inotify_fd = inotify_init();
@@ -110,21 +133,35 @@ int main(int argc, char **argv)
 	}
 	else if (opt.display){
 		/* Slideshow mode is the default. Because it's spiffy */
+            weprintf("in slideshow mode..");
+
 		opt.slideshow = 1;
-		init_slideshow_mode();
+		winwid = init_slideshow_mode();
 	}
 	else {
 		eprintf("Invalid option combination");
 	}
 
 	/* main event loop */
-	while (feh_main_iteration(1));
+	while (feh_main_iteration(winwid, 1));
 
 	return(sig_exit);
 }
 
+
+void initialize_drag_and_drop(winwidget winwid)
+{
+    if (winwid == NULL) {
+        weprintf("no winwidget passed. cannot initialize drag and drop!");
+        return;
+    }
+
+    init_selection_dnd();
+}
+
+
 /* Return 0 to stop iterating, 1 if ok to continue. */
-int feh_main_iteration(int block)
+int feh_main_iteration(winwidget winwid, int block)
 {
 	static int first = 1;
 	static int xfd = 0;
@@ -159,7 +196,11 @@ int feh_main_iteration(int block)
 		if (isatty(STDIN_FILENO) && !opt.multiwindow && getpgrp() == (tcgetpgrp(STDIN_FILENO))) {
 			setup_stdin();
 		}
+
+                init_selection_x_vars(disp, winwid->win);
+                initialize_drag_and_drop(winwid);
 	}
+
 
 	/* Timers */
 	t1 = feh_get_time();
@@ -167,6 +208,7 @@ int feh_main_iteration(int block)
 	pt = t1;
 	while (XPending(disp)) {
 		XNextEvent(disp, &ev);
+                handle_drag_related_events(&ev);
 		if (ev_handler[ev.type])
 			(*(ev_handler[ev.type])) (&ev);
 

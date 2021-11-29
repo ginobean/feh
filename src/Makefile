@@ -26,6 +26,7 @@ TARGETS = \
 	wallpaper.c \
 	winwidget.c
 
+
 CXX = g++
 CXX_SOURCES = $(wildcard *.cpp)
 CXX_OBJECTS = $(patsubst %.cpp,%.o,$(CXX_SOURCES))

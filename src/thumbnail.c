@@ -354,7 +354,7 @@ void init_thumbnail_mode(void)
 				winwidget_render_image(winwid, 0, 1);
 				thumb_counter = 0;
 			}
-			if (!feh_main_iteration(0))
+			if (!feh_main_iteration(NULL, 0))
 				exit(0);
 		}
 	}

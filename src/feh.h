@@ -135,7 +135,8 @@ enum feh_load_error {
 
 typedef void (*sighandler_t) (int);
 
-int feh_main_iteration(int block);
+int feh_main_iteration(winwidget winwid, int block);
+
 void feh_handle_event(XEvent * ev);
 void init_imlib_fonts(void);
 void init_x_and_imlib(void);
@@ -145,7 +146,7 @@ void init_xinerama(void);
 void init_multiwindow_mode(void);
 void init_thumbnail_mode(void);
 void init_index_mode(void);
-void init_slideshow_mode(void);
+winwidget init_slideshow_mode(void);
 void init_list_mode(void);
 void init_loadables_mode(void);
 void init_unloadables_mode(void);
