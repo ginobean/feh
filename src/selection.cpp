@@ -102,9 +102,18 @@ emit_client_info(XEvent& event, string eventDescription)
 }
 
 
-void set_current_file_uri(const std::string& uri)
+bool set_current_file_uri(std::string& uri)
 {
-    typed_data[XA_text_uri_list] = uri;
+    if (uri.find("://") == std::string::npos) {
+        uri.insert(0, "file://");
+    }
+
+    if (typed_data[XA_text_uri_list] != uri) {
+        typed_data[XA_text_uri_list] = uri;
+        return true;
+    }
+
+    return false;
 }
 
 
@@ -334,17 +343,17 @@ init_selection_dnd()
 	//actual data. The data consists of a prespecified list of files in the
 	//current or install directory, and the URL of the PNG, in various
 	//incarnations.
-    string url;
+//    string url;
 
 //	typed_data[XA_image_bmp] = read_whole_file("r0x0r.bmp", url);
 //	typed_data[XA_image_jpg] = read_whole_file("r0x0r.jpg", url);
 //	typed_data[XA_image_tiff] = read_whole_file("r0x0r.tiff", url);
 //    (void) read_whole_file("r0x0r.png", url);
-    url = "file:///data/external/feh/src/r0x0r.png";
+//    url = "file:///data/external/feh/src/r0x0r.png";
 
-    cerr << "url = " << url << endl;
+//    cerr << "url = " << url << endl;
 
-	typed_data[XA_text_uri_list] = url;
+//	typed_data[XA_text_uri_list] = url;
 //	typed_data[XA_text_uri] = url;
 //	typed_data[XA_text_plain] = url;
 //	typed_data[XA_text] = url;
@@ -363,7 +372,7 @@ handle_drag_related_events(XEvent* ep)
 
     if(event.type == SelectionRequest)
     {
-        //A request to paste has occured.
+        //A request to select and drag, to a possibly different app,  has occured.
         process_selection_request(event, typed_data);
     }
     else if(event.type == MotionNotify && dragging == 0)

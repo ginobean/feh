@@ -4,7 +4,7 @@
 #include <X11/Xlib.h>
 #include <string>
 
-void set_current_file_uri(const std::string& uri);
+bool set_current_file_uri(std::string& uri);
 
 void init_selection_x_vars(Display *d, Window w);
 void init_selection_dnd();

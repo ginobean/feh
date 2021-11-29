@@ -201,6 +201,13 @@ int feh_main_iteration(winwidget winwid, int block)
                 initialize_drag_and_drop(winwid);
 	}
 
+    if (winwid->file) {
+        string fileUri = FEH_FILE(winwid->file->data)->filename;
+        if (set_current_file_uri(fileUri)) {
+            cerr << "main.cpp setting fileUri = " << fileUri << endl;
+        }
+
+    }
 
 	/* Timers */
 	t1 = feh_get_time();
