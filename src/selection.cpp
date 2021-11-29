@@ -32,8 +32,6 @@ using namespace std;
 #define CAN_DROP 2
 
 
-bool emit_verbose_dnd_status_info = false;
-
 static Display* disp = NULL;
 static Window window = None;
 static Window previous_window = None; // Window found by the last MotionNotify event.
@@ -76,6 +74,7 @@ static map<Atom, string> typed_data;
 
 
 
+#if DEBUG
 //Utility function for getting the atom name as a string.
 static string GetAtomName(Display* disp, Atom a)
 {
@@ -84,12 +83,12 @@ static string GetAtomName(Display* disp, Atom a)
 	else
 		return XGetAtomName(disp, a);
 }
+#endif
 
-
+#if VERBOSE_DEBUG
 static void
 emit_client_info(XEvent& event, string eventDescription)
 {
-#if VERBOSE_DEBUG
     cout  << eventDescription << " event received" << endl
           << "    Target window           = 0x" << hex << event.xclient.data.l[0] << dec << endl
           << "    Will accept             = " << (event.xclient.data.l[1] & 1)  << endl
@@ -99,8 +98,17 @@ emit_client_info(XEvent& event, string eventDescription)
           << "    Rectangle of silence w  = " << (event.xclient.data.l[3] >> 16)    << endl
           << "    Rectangle of silence h  = " << (event.xclient.data.l[3] & 0xffff)    << endl
           << "    Action                  = " << GetAtomName(disp, event.xclient.data.l[4]) << endl;
-#endif
 }
+#else
+
+static void
+emit_client_info(XEvent& , string )
+{
+  // nada.
+}
+
+#endif
+
 
 
 bool set_current_file_uri(std::string& uri)
@@ -117,33 +125,6 @@ bool set_current_file_uri(std::string& uri)
     return false;
 }
 
-
-//A simple, inefficient function for reading a
-//whole file in to memory
-string read_whole_file(const string& name, string& fullname)
-{
-	ostringstream f;
-	ifstream file;
-
-	//Try in the current directory first, then in the data directory
-	{
-		vector<char> buf(4096, 0);
-		getcwd(&buf[0], 4095);
-		fullname = &buf[0] + string("/") + name;
-	}
-
-	file.open(fullname.c_str(), ios::binary);
-
-	// if(!file.good())
-	// {
-	// 	fullname = DATADIR + name;
-	// 	file.open(fullname.c_str(), ios::binary);
-	// }
-
-	f << file.rdbuf();
-
-	return f.str();
-}
 
 
 //Construct a list of targets and place them in the specified property This
@@ -182,7 +163,7 @@ void process_selection_request(XEvent e, map<Atom, string>& typed_data)
 		return;
 
 	//Extract the relavent data
-	Window owner     = e.xselectionrequest.owner;
+
 	Atom selection   = e.xselectionrequest.selection;
 	Atom target      = e.xselectionrequest.target;
 	Atom property    = e.xselectionrequest.property;
@@ -191,6 +172,8 @@ void process_selection_request(XEvent e, map<Atom, string>& typed_data)
 	Display* disp    = e.xselection.display;
 
 #if DEBUG
+	Window owner     = e.xselectionrequest.owner;
+
 	cout << "A selection request has arrived!\n";
 	cout << hex << "Owner = 0x" << owner << endl;
 	cout << "Selection atom = " << GetAtomName(disp, selection) << endl;
@@ -586,9 +569,7 @@ handle_drag_related_events(XEvent* ep)
     }
     else if(event.type == ClientMessage && event.xclient.message_type == XA_XdndStatus)
     {
-        if (emit_verbose_dnd_status_info) {
-            emit_client_info(event, "XdndStatus");
-        }
+        emit_client_info(event, "XdndStatus");
 
         if( (event.xclient.data.l[1] & 1) == 0 &&  event.xclient.data.l[4] != None)
         {
