@@ -197,22 +197,26 @@ int feh_main_iteration(winwidget winwid, int block)
 			setup_stdin();
 		}
 
-                init_selection_x_vars(disp, winwid->win);
-                initialize_drag_and_drop(winwid);
+                if (winwid != NULL) {
+                    init_selection_x_vars(disp, winwid->win);
+                    initialize_drag_and_drop(winwid);
+                }
 	}
 
-    if (winwid->file) {
-        string fileUri = FEH_FILE(winwid->file->data)->filename;
-        char *abs_path = feh_absolute_path(fileUri.c_str());
-        fileUri = abs_path;
-        free(abs_path);
-        abs_path = NULL;
+        if (winwid != NULL) {
+            if (winwid->file) {
+                string fileUri = FEH_FILE(winwid->file->data)->filename;
+                char *abs_path = feh_absolute_path(fileUri.c_str());
+                fileUri = abs_path;
+                free(abs_path);
+                abs_path = NULL;
 
-        if (set_current_file_uri(fileUri)) {
-            cerr << "main.cpp setting fileUri = " << fileUri << endl;
+                if (set_current_file_uri(fileUri)) {
+                    cerr << "main.cpp setting fileUri = " << fileUri << endl;
+                }
+
+            }
         }
-
-    }
 
 	/* Timers */
 	t1 = feh_get_time();

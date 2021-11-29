@@ -347,9 +347,14 @@ init_selection_dnd()
 	XFlush(disp);
 }
 
+
 bool
 handle_drag_related_events(XEvent* ep)
 {
+    if (disp == NULL) {
+        return false;
+    }
+
     XEvent& event = *ep;
 
     if(event.type == SelectionRequest)
