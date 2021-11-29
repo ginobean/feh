@@ -63,7 +63,7 @@ void weprintf(char *fmt, ...)
 }
 
 /* estrdup: duplicate a string, report if error */
-char *_estrdup(char *s)
+char *_estrdup(const char *s)
 {
 	char *t;
 
@@ -143,7 +143,7 @@ char *estrjoin(const char *separator, ...)
 	return string;
 }
 
-char path_is_url(char *path) {
+char path_is_url(const char *path) {
 	if ((!strncmp(path, "http://", 7))
 			|| (!strncmp(path, "https://", 8))
 			|| (!strncmp(path, "gopher://", 9))
