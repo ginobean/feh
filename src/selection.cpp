@@ -35,7 +35,6 @@ using namespace std;
 bool emit_verbose_dnd_status_info = false;
 
 static Display* disp = NULL;
-static Window root = None;
 static Window window = None;
 static Window previous_window = None; // Window found by the last MotionNotify event.
 static Window drag_to_window= None;
@@ -298,11 +297,7 @@ Window find_app_window(Display* disp, Window w)
 void
 init_selection_x_vars(Display *d, Window w)
 {
-    int screen;
-
     disp = d;
-    screen = DefaultScreen(disp);
-    root = RootWindow(disp, screen);
     window = w;
 }
 
@@ -363,7 +358,8 @@ handle_drag_related_events(XEvent* ep)
     else if(event.type == MotionNotify && dragging == 0)
     {
         if (event.xmotion.state & Button1Mask) {
-            if(XGrabPointer(disp, window, True, Button1MotionMask | ButtonReleaseMask, GrabModeAsync, GrabModeAsync, root, grab_bad, CurrentTime) == GrabSuccess)
+            cerr << " window value = " << hex << window << endl;
+            if(XGrabPointer(disp, window, True, Button1MotionMask | ButtonReleaseMask, GrabModeAsync, GrabModeAsync, DefaultRootWindow(disp), grab_bad, CurrentTime) == GrabSuccess)
             {
                 dragging=1;
                 XSetSelectionOwner(disp, XA_XdndSelection, window, CurrentTime);
@@ -383,10 +379,12 @@ handle_drag_related_events(XEvent* ep)
 
         //Look for XdndAware in the window under the pointer. So, first,
         //find the window under the pointer.
-        drag_to_window = find_app_window(disp, root);
+        drag_to_window = find_app_window(disp, DefaultRootWindow(disp));
+#if VERBOSE_DEBUG
         if (drag_to_window != None) {
             cout << "Application window is: 0x" << hex << drag_to_window << dec << endl;
         }
+#endif
 
         if(drag_to_window == previous_window)
             window_version = previous_window_version;
@@ -503,11 +501,13 @@ handle_drag_related_events(XEvent* ep)
             m.data.l[3] = CurrentTime; //Our data is not time dependent, so send a generic timestamp;
             m.data.l[4] = XA_XdndActionCopy;
 
+#if VERBOSE_DEBUG
             cerr << "Sending XdndPosition" << endl
                  << "    x      = " << x << endl
                  << "    y      = " << y << endl
                  << "    Time   = " << m.data.l[3] << endl
                  << "    Action = " << GetAtomName(disp, m.data.l[4]) << endl;
+#endif
 
             XSendEvent(disp, drag_to_window, False, NoEventMask, (XEvent*)&m);
             XFlush(disp);
@@ -602,13 +602,12 @@ int selection_main(int argc, char**argv)
 	//Standard X init stuff
 	disp = XOpenDisplay(NULL);
 	screen = DefaultScreen(disp);
-	root = RootWindow(disp, screen);
 
 	//A window is required to perform copy/paste operations
 	//but it does not need to be mapped.
     auto border_color = BlackPixel(disp, screen); // shade of gray
     auto fill_color = 0x228b22; // bright green
-    window = XCreateSimpleWindow(disp, root, 0, 0, 400, 400, 0, border_color, fill_color);
+    window = XCreateSimpleWindow(disp, DefaultRootWindow(disp), 0, 0, 400, 400, 0, border_color, fill_color);
     //We need to map the window to drag from
     XMapWindow(disp, window);
     XSelectInput(disp, window, ButtonPressMask | Button1MotionMask | ButtonReleaseMask);
