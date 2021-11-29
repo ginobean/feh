@@ -311,9 +311,7 @@ void
 init_selection_dnd()
 {
 	//Create three cursors for the three different XDnD states.
-	//I think a turkey is a good choice for a program which doesn't
-	//understand Xdnd.
-	grab_bad =XCreateFontCursor(disp, XC_gobbler);
+	grab_bad =XCreateFontCursor(disp, XC_fleur);
 	grab_maybe =XCreateFontCursor(disp, XC_circle);
 	grab_good =XCreateFontCursor(disp, XC_sb_down_arrow);
 
