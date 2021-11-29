@@ -198,12 +198,16 @@ int feh_main_iteration(winwidget winwid, int block)
 		}
 
                 if (winwid != NULL) {
-                    init_selection_x_vars(disp, winwid->win);
+                    update_selection_x_vars(disp, winwid->win);
                     initialize_drag_and_drop(winwid);
                 }
 	}
 
         if (winwid != NULL) {
+            // the actual X11 window can change on us, as feh will
+            // dynamically change it, such as when toggling fullscreen mode..
+            update_selection_x_vars(disp, winwid->win);
+
             if (winwid->file) {
                 string fileUri = FEH_FILE(winwid->file->data)->filename;
                 char *abs_path = feh_absolute_path(fileUri.c_str());

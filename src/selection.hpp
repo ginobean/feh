@@ -6,7 +6,7 @@
 
 bool set_current_file_uri(std::string& uri);
 
-void init_selection_x_vars(Display *d, Window w);
+void update_selection_x_vars(Display *d, Window w);
 void init_selection_dnd();
 bool handle_drag_related_events(XEvent* ep);
 

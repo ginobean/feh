@@ -295,7 +295,7 @@ Window find_app_window(Display* disp, Window w)
 
 
 void
-init_selection_x_vars(Display *d, Window w)
+update_selection_x_vars(Display *d, Window w)
 {
     disp = d;
     window = w;
