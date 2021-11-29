@@ -203,6 +203,11 @@ int feh_main_iteration(winwidget winwid, int block)
 
     if (winwid->file) {
         string fileUri = FEH_FILE(winwid->file->data)->filename;
+        char *abs_path = feh_absolute_path(fileUri.c_str());
+        fileUri = abs_path;
+        free(abs_path);
+        abs_path = NULL;
+
         if (set_current_file_uri(fileUri)) {
             cerr << "main.cpp setting fileUri = " << fileUri << endl;
         }

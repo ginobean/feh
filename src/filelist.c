@@ -626,7 +626,7 @@ gib_list *feh_read_filelist(char *filename)
 	return(list);
 }
 
-char *feh_absolute_path(char *path)
+char *feh_absolute_path(const char *path)
 {
 	char cwd[PATH_MAX];
 	char fullpath[PATH_MAX];
@@ -641,7 +641,7 @@ char *feh_absolute_path(char *path)
 	   filelist file can be saved anywhere and feh will still find the
 	   images */
 	D(("Need to convert %s to an absolute form\n", path));
-	/* I SHOULD be able to just use a simple realpath() here, but dumb * 
+	/* I SHOULD be able to just use a simple realpath() here, but dumb *
 	   old Solaris's realpath doesn't return an absolute path if the
 	   path you give it is relative. Linux and BSD get this right... */
 	if (getcwd(cwd, sizeof(cwd)) == NULL)

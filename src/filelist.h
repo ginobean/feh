@@ -94,7 +94,7 @@ void feh_file_dirname(char *dst, feh_file * f, int maxlen);
 void feh_prepare_filelist(void);
 int feh_write_filelist(gib_list * list, char *filename);
 gib_list *feh_read_filelist(char *filename);
-char *feh_absolute_path(char *path);
+char *feh_absolute_path(const char *path);
 gib_list *feh_file_remove_from_list(gib_list * list, gib_list * l);
 void feh_save_filelist();
 char *feh_http_unescape(char * url);
