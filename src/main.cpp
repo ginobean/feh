@@ -225,7 +225,9 @@ int feh_main_iteration(winwidget winwid, int block)
                         abs_path = NULL;
 
                         if (set_current_file_uri(fileUri)) {
-                            cerr << "main.cpp setting fileUri = " << fileUri << endl;
+#if DEBUG
+                            cerr << "setting fileUri = " << fileUri << endl;
+#endif
                         }
                     }
                     else { // (! winwid->file)
@@ -249,13 +251,17 @@ int feh_main_iteration(winwidget winwid, int block)
                                 abs_path = NULL;
 
                                 if (set_current_file_uri(fileUri)) {
-                                    cerr << "main.cpp setting thumbnail fileUri = " << fileUri << endl;
+#if DEBUG
+                                    cerr << "setting thumbnail fileUri = " << fileUri << endl;
+#endif
                                 }
                             }
                             else {
                                 string fileUri;
                                 set_current_file_uri(fileUri);
+#if DEBUG
                                 cerr << " clearing current thumbnail filename.." << endl;
+#endif
                             }
                         }
                     } // end else.

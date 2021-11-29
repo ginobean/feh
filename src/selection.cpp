@@ -89,6 +89,7 @@ static string GetAtomName(Display* disp, Atom a)
 static void
 emit_client_info(XEvent& event, string eventDescription)
 {
+#if VERBOSE_DEBUG
     cout  << eventDescription << " event received" << endl
           << "    Target window           = 0x" << hex << event.xclient.data.l[0] << dec << endl
           << "    Will accept             = " << (event.xclient.data.l[1] & 1)  << endl
@@ -98,6 +99,7 @@ emit_client_info(XEvent& event, string eventDescription)
           << "    Rectangle of silence w  = " << (event.xclient.data.l[3] >> 16)    << endl
           << "    Rectangle of silence h  = " << (event.xclient.data.l[3] & 0xffff)    << endl
           << "    Action                  = " << GetAtomName(disp, event.xclient.data.l[4]) << endl;
+#endif
 }
 
 
@@ -156,10 +158,12 @@ void set_targets_property(Display* disp, Window w, map<Atom, string>& typed_data
 		targets.push_back(i->first);
 
 
+#if DEBUG
 	cout << "Offering: ";
 	for(unsigned int i=0; i < targets.size(); i++)
 		cout << GetAtomName(disp, targets[i]) << "  ";
 	cout << endl;
+#endif
 
 	//Fill up this property with a list of targets.
 	XChangeProperty(disp, w, property, XA_ATOM, 32, PropModeReplace,
@@ -186,6 +190,7 @@ void process_selection_request(XEvent e, map<Atom, string>& typed_data)
 	Time timestamp   = e.xselectionrequest.time;
 	Display* disp    = e.xselection.display;
 
+#if DEBUG
 	cout << "A selection request has arrived!\n";
 	cout << hex << "Owner = 0x" << owner << endl;
 	cout << "Selection atom = " << GetAtomName(disp, selection) << endl;
@@ -193,7 +198,7 @@ void process_selection_request(XEvent e, map<Atom, string>& typed_data)
 	cout << "Property atom  = " << GetAtomName(disp, property) << endl;
 	cout << hex << "Requestor = 0x" << requestor << dec << endl;
 	cout << "Timestamp = " << timestamp << endl;
-
+#endif
 
 	//X should only send requests for the selections since we own.
 	//since we own exaclty one, we don't need to check it.
@@ -217,14 +222,18 @@ void process_selection_request(XEvent e, map<Atom, string>& typed_data)
 
 	if(target ==XA_TARGETS)
 	{
+#if DEBUG
 		cout << "Replying with a target list.\n";
+#endif
 		set_targets_property(disp, requestor, typed_data, property);
 		s.xselection.property = property;
 	}
 	else if(typed_data.count(target))
 	{
 		//We're asked to convert to one the formate we know about
+#if DEBUG
 		cout << "Replying with which ever data I have" << endl;
+#endif
 
 		//Fill up the property with the URI.
 		s.xselection.property = property;
@@ -243,19 +252,20 @@ void process_selection_request(XEvent e, map<Atom, string>& typed_data)
 		//and I've never encountered a program which requests this (I can't
 		//test it), so I haven't implemented it.
 
+#if DEBUG
 		cout << "MULTIPLE is not implemented. It should be, according to the ICCCM, but\n"
 			 << "I've never encountered it, so I can't test it.\n";
+#endif
 	}
 	else
 	{
 		//We've been asked to converto to something we don't know
 		//about.
-		cout << "No valid conversion. Replying with refusal.\n";
+		cerr << "No valid conversion. Replying with refusal.\n";
 	}
 
 	//Reply
 	XSendEvent(disp, e.xselectionrequest.requestor, True, 0, &s);
-	cout << endl;
 }
 
 
@@ -299,7 +309,9 @@ update_selection_x_vars(Display *d, Window w)
 {
     disp = d;
     if (window != w) {
+#if DEBUG
         cerr << "updating window to " << hex << w << endl;
+#endif
         window = w;
     }
 }
@@ -361,15 +373,22 @@ handle_drag_related_events(XEvent* ep)
     else if(event.type == MotionNotify && dragging == 0)
     {
         if (event.xmotion.state & Button1Mask) {
+#if DEBUG
             cerr << " window value = " << hex << window << endl;
+#endif
             if(XGrabPointer(disp, window, True, Button1MotionMask | ButtonReleaseMask, GrabModeAsync, GrabModeAsync, DefaultRootWindow(disp), grab_bad, CurrentTime) == GrabSuccess)
             {
                 dragging=1;
                 XSetSelectionOwner(disp, XA_XdndSelection, window, CurrentTime);
+#if DEBUG
                 cout << "Begin dragging.\n\n";
+#endif
             }
-            else
+            else {
+#if DEBUG
                 cout << "Grab failed!\n\n";
+#endif
+            }
         }
     }
     else if(event.type == MotionNotify)
@@ -394,17 +413,19 @@ handle_drag_related_events(XEvent* ep)
         else if(drag_to_window == None)
             ;
         else if(XGetWindowProperty(disp, drag_to_window, XA_XdndAware, 0, 2, False, AnyPropertyType, &atmp, &fmt, &nitems, &bytes_remaining, &data) != Success)
-            cout << "Property read failed.\n";
+            cerr << "Property read failed.\n";
         else if(data == 0)
-            cout << "Property read failed.\n";
+            cerr << "Property read failed.\n";
         else if(fmt != 32)
-            cout << "XdndAware should be 32 bits, not " << fmt << " bits\n";
+            cerr << "XdndAware should be 32 bits, not " << fmt << " bits\n";
         else if(nitems != 1)
-            cout << "XdndAware should contain exactly 1 item, not " << nitems << " items\n";
+            cerr << "XdndAware should contain exactly 1 item, not " << nitems << " items\n";
         else
         {
             window_version = data[0];
+#if DEBUG
             cout << "XDnD window_version is " << window_version << endl;
+#endif
         }
 
         if(status == UNAWARE && window_version != -1)
@@ -424,7 +445,9 @@ handle_drag_related_events(XEvent* ep)
 
         if(drag_to_window != previous_window && previous_window_version != -1)
         {
+#if DEBUG
             cout << "Left window 0x" << hex << previous_window  << dec << ": sending XdndLeave\n";
+#endif
             //We've left an old, aware window.
             //Send an XDnD Leave
 
@@ -447,7 +470,9 @@ handle_drag_related_events(XEvent* ep)
 
         if(drag_to_window != previous_window && window_version != -1)
         {
+#if DEBUG
             cout << "Entered window 0x" << hex << drag_to_window  << dec << ": sending XdndLeave\n";
+#endif
             //We've entered a new, aware drag_to_window.
             //Send an XDnD Enter event.
             map<Atom, string>::const_iterator i = typed_data.begin();
@@ -466,11 +491,13 @@ handle_drag_related_events(XEvent* ep)
             m.data.l[4] = typed_data.size() > 2 ? i->first : 0;
 
 
+#if DEBUG
             cout << "   window_version  = " << min(5, window_version) << endl
                  << "   >3 types = " << (typed_data.size() > 3) << endl
                  << "   Type 1   = " << GetAtomName(disp, m.data.l[2]) << endl
                  << "   Type 2   = " << GetAtomName(disp, m.data.l[3]) << endl
                  << "   Type 3   = " << GetAtomName(disp, m.data.l[4]) << endl;
+#endif
 
             XSendEvent(disp, drag_to_window, False, NoEventMask, (XEvent*)&m);
             XFlush(disp);
@@ -519,16 +546,19 @@ handle_drag_related_events(XEvent* ep)
 
         previous_window = drag_to_window;
         previous_window_version = window_version;
-//			cout << endl;
     }
     else if(dragging && event.type == ButtonRelease && event.xbutton.button == 1)
     {
+#if DEBUG
         cout << "Mouse button was released.\n";
+#endif
 
 
         if(status == CAN_DROP)
         {
+#if DEBUG
             cout << "Perform drop:\n";
+#endif
 
             XClientMessageEvent m;
             memset(&m, 0, sizeof(m));
@@ -553,7 +583,6 @@ handle_drag_related_events(XEvent* ep)
         status=UNAWARE;
         previous_window=None;
         previous_window_version=-1;
-//			cout << endl;
     }
     else if(event.type == ClientMessage && event.xclient.message_type == XA_XdndStatus)
     {
@@ -563,7 +592,9 @@ handle_drag_related_events(XEvent* ep)
 
         if( (event.xclient.data.l[1] & 1) == 0 &&  event.xclient.data.l[4] != None)
         {
+#if DEBUG
             cout << "Action is given, even though the target won't accept a drop.\n";
+#endif
         }
 
 
@@ -576,21 +607,27 @@ handle_drag_related_events(XEvent* ep)
                 status = UNRECEPTIVE;
         }
 
-        if(!dragging)
+        if(!dragging) {
+#if DEBUG
             cout << "Message received, but dragging is not active!\n";
+#endif
+        }
 
-        if(status == UNAWARE)
+        if(status == UNAWARE) {
+#if DEBUG
             cout << "Message received, but we're not in an aware window!\n";
-
-//			cout << endl;
+#endif
+        }
     }
     else if(event.type == ClientMessage && event.xclient.message_type == XA_XdndFinished)
     {
         //Check for these messages. Since out data is static, we don't need to do anything.
+#if DEBUG
         cout  << "XDnDFinished event received:" << endl
               << "    Target window           = 0x" << hex << event.xclient.data.l[0] << dec << endl
               << "    Was successful          = " << (event.xclient.data.l[1] & 1)  << endl
               << "    Action                  = " << GetAtomName(disp, event.xclient.data.l[2]) << endl;
+#endif
     }
 
     return true;
