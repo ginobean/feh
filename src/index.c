@@ -299,8 +299,7 @@ void init_index_mode(void)
 		}
 		if (opt.display) {
 			winwidget_render_image(winwid, 0, 0);
-                        fprintf(stderr, " invoking feh_main_iter from index.c !\n");
-			if (!feh_main_iteration(NULL, 0))
+			if (!feh_main_iteration(winwid, 0))
 				exit(0);
 		}
 	}

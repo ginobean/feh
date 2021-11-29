@@ -542,7 +542,7 @@ handle_drop_related_events(XEvent* ep)
 
 
 
-int paste_main(int argc, char ** argv)
+int paste_main(int , char ** )
 {
     int screen;
     XEvent e;

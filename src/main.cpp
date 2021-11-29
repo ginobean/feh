@@ -70,6 +70,19 @@ static bool initialized_mylog = false;
 static map<string, int> datatypes;
 
 
+void
+update_selection_vars(Display* d, winwidget winwid) {
+    Window w = None;
+
+    if (winwid != NULL) {
+        w = winwid->win;
+    }
+
+    update_selection_x_vars(d, w);
+}
+
+
+
 int main(int argc, char **argv)
 {
     winwidget winwid = NULL;
@@ -189,7 +202,7 @@ int feh_main_iteration(winwidget winwid, int block)
 			setup_stdin();
 		}
 
-        update_selection_x_vars(disp, winwid->win);
+        update_selection_vars(disp, winwid);
         init_selection_dnd();
 	}
 
@@ -200,7 +213,7 @@ int feh_main_iteration(winwidget winwid, int block)
 	while (XPending(disp)) {
 		XNextEvent(disp, &ev);
         auto winwid = winwidget_get_from_window(ev.xany.window);
-        update_selection_x_vars(disp, ev.xany.window);
+        update_selection_vars(disp, winwid);
         if (winwid && winwid->file) {
             string fileUri = FEH_FILE(winwid->file->data)->filename;
             char *abs_path = feh_absolute_path(fileUri.c_str());

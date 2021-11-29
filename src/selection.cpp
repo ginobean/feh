@@ -595,33 +595,3 @@ handle_drag_related_events(XEvent* ep)
 
     return true;
 }
-
-
-int selection_main(int argc, char**argv)
-{
-	int screen;
-	XEvent event;
-
-	//Standard X init stuff
-	disp = XOpenDisplay(NULL);
-	screen = DefaultScreen(disp);
-
-	//A window is required to perform copy/paste operations
-	//but it does not need to be mapped.
-    auto border_color = BlackPixel(disp, screen); // shade of gray
-    auto fill_color = 0x228b22; // bright green
-    window = XCreateSimpleWindow(disp, DefaultRootWindow(disp), 0, 0, 400, 400, 0, border_color, fill_color);
-    //We need to map the window to drag from
-    XMapWindow(disp, window);
-    XSelectInput(disp, window, ButtonPressMask | Button1MotionMask | ButtonReleaseMask);
-
-    init_selection_dnd();
-
-	for(;;)
-	{
-		XNextEvent(disp, &event);
-        handle_drag_related_events(&event);
-	} // end for.
-
-	return 0;
-}
