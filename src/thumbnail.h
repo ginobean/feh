@@ -33,17 +33,17 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #define FEH_THUMB(l) ((feh_thumbnail *) l)
 
-typedef struct thumbnail {
+typedef struct _feh_thumbnail {
 	int x;
 	int y;
 	int w;
 	int h;
 	feh_file *file;
 	unsigned char exists;
-	struct feh_thumbnail *next;
+	struct _feh_thumbnail *next;
 } feh_thumbnail;
 
-typedef struct thumbmode_data {
+typedef struct _thumbmode_data {
 	Imlib_Image im_main;     /* base image which all thumbnails are rendered on */
 	Imlib_Image im_bg;       /* background for the thumbnails */
 
