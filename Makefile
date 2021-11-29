@@ -41,8 +41,8 @@ install-doc: AUTHORS ChangeLog README.md TODO
 install-bin: src/feh
 	@echo installing executables to ${bin_dir}
 	@mkdir -p ${bin_dir}
-	@cp src/feh ${bin_dir}/feh.tmp
-	@mv ${bin_dir}/feh.tmp ${bin_dir}/feh
+	@cp src/feh ${bin_dir}/
+	strip ${bin_dir}/feh
 	@chmod 755 ${bin_dir}/feh
 
 install-font:
