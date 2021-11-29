@@ -203,32 +203,28 @@ int feh_main_iteration(winwidget winwid, int block)
                 }
 	}
 
-        if (winwid != NULL) {
-            // the actual X11 window can change on us, as feh will
-            // dynamically change it, such as when toggling fullscreen mode..
-            update_selection_x_vars(disp, winwid->win);
-
-            if (winwid->file) {
-                string fileUri = FEH_FILE(winwid->file->data)->filename;
-                char *abs_path = feh_absolute_path(fileUri.c_str());
-                fileUri = abs_path;
-                free(abs_path);
-                abs_path = NULL;
-
-                if (set_current_file_uri(fileUri)) {
-                    cerr << "main.cpp setting fileUri = " << fileUri << endl;
-                }
-
-            }
-        }
-
 	/* Timers */
 	t1 = feh_get_time();
 	t2 = t1 - pt;
 	pt = t1;
 	while (XPending(disp)) {
 		XNextEvent(disp, &ev);
-                handle_drag_related_events(&ev);
+        auto winwid = winwidget_get_from_window(ev.xany.window);
+        update_selection_x_vars(disp, ev.xany.window);
+        if (winwid && winwid->file) {
+            string fileUri = FEH_FILE(winwid->file->data)->filename;
+            char *abs_path = feh_absolute_path(fileUri.c_str());
+            fileUri = abs_path;
+            free(abs_path);
+            abs_path = NULL;
+
+            if (set_current_file_uri(fileUri)) {
+                cerr << "main.cpp setting fileUri = " << fileUri << endl;
+            }
+        }
+
+        handle_drag_related_events(&ev);
+
 		if (ev_handler[ev.type])
 			(*(ev_handler[ev.type])) (&ev);
 

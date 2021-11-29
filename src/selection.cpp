@@ -298,7 +298,10 @@ void
 update_selection_x_vars(Display *d, Window w)
 {
     disp = d;
-    window = w;
+    if (window != w) {
+        cerr << "updating window to " << hex << w << endl;
+        window = w;
+    }
 }
 
 

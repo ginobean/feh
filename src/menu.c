@@ -312,7 +312,7 @@ void feh_menu_item_activate(feh_menu * m, feh_menu_item * i)
 	   freeing menus on hiding, it will break ;-) */
 	if ((i) && (i->action)) {
 		feh_menu_hide(menu_root, False);
-		feh_main_iteration(NULL, 0);
+		feh_main_iteration(m->fehwin, 0);
 		feh_menu_cb(m, i, i->action, i->data);
 		if (m->func_free)
 			m->func_free(m);
