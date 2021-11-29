@@ -214,53 +214,53 @@ int feh_main_iteration(winwidget winwid, int block)
 		XNextEvent(disp, &ev);
         auto winwid = winwidget_get_from_window(ev.xany.window);
         update_selection_vars(disp, winwid);
-        if (winwid && winwid->file) {
-            string fileUri = FEH_FILE(winwid->file->data)->filename;
-            char *abs_path = feh_absolute_path(fileUri.c_str());
-            fileUri = abs_path;
-            free(abs_path);
-            abs_path = NULL;
 
-            if (set_current_file_uri(fileUri)) {
-                cerr << "main.cpp setting fileUri = " << fileUri << endl;
-            }
-        }
-        if (winwid && (! winwid->file)) {
-            // check if thumbnails view
-            if (winwid->type == WIN_TYPE_THUMBNAIL) {
-                if (ev.type == ButtonPress) {
-                    if (ev.xbutton.button == 1) {
-                        feh_file *thumbfile;
-                        int x, y;
+        if (winwid && (ev.type == ButtonPress)) {
+                if (ev.xbutton.button == 1) {
+                    if (winwid->file) {
+                        string fileUri = FEH_FILE(winwid->file->data)->filename;
+                        char *abs_path = feh_absolute_path(fileUri.c_str());
+                        fileUri = abs_path;
+                        free(abs_path);
+                        abs_path = NULL;
 
-                        x = ev.xbutton.x;
-                        y = ev.xbutton.y;
-                        x -= winwid->im_x;
-                        y -= winwid->im_y;
-                        x /= winwid->zoom;
-                        y /= winwid->zoom;
-                        thumbfile = feh_thumbnail_get_file_from_coords(x, y);
-                        if (thumbfile) {
-                            string fileUri = thumbfile->filename;
-                            char *abs_path = feh_absolute_path(fileUri.c_str());
-                            fileUri = abs_path;
-                            free(abs_path);
-                            abs_path = NULL;
+                        if (set_current_file_uri(fileUri)) {
+                            cerr << "main.cpp setting fileUri = " << fileUri << endl;
+                        }
+                    }
+                    else { // (! winwid->file)
+                        // check if thumbnails view
+                        if (winwid->type == WIN_TYPE_THUMBNAIL) {
+                            feh_file *thumbfile;
+                            int x, y;
 
-                            if (set_current_file_uri(fileUri)) {
-                                cerr << "main.cpp setting thumbnail fileUri = " << fileUri << endl;
+                            x = ev.xbutton.x;
+                            y = ev.xbutton.y;
+                            x -= winwid->im_x;
+                            y -= winwid->im_y;
+                            x /= winwid->zoom;
+                            y /= winwid->zoom;
+                            thumbfile = feh_thumbnail_get_file_from_coords(x, y);
+                            if (thumbfile) {
+                                string fileUri = thumbfile->filename;
+                                char *abs_path = feh_absolute_path(fileUri.c_str());
+                                fileUri = abs_path;
+                                free(abs_path);
+                                abs_path = NULL;
+
+                                if (set_current_file_uri(fileUri)) {
+                                    cerr << "main.cpp setting thumbnail fileUri = " << fileUri << endl;
+                                }
+                            }
+                            else {
+                                string fileUri;
+                                set_current_file_uri(fileUri);
+                                cerr << " clearing current thumbnail filename.." << endl;
                             }
                         }
-                        else {
-                            string fileUri;
-                            set_current_file_uri(fileUri);
-                            cerr << " clearing current thumbnail filename.." << endl;
-                        }
-                    } // end if (ev.xbutton.state
-                } // end ev.type == ButtonPress
-            }
-        }
-
+                    } // end else.
+            } // end ev.xbutton == 1
+        } // end (winwid && (ev.type == ButtonPress)
 
         handle_drag_related_events(&ev);
 
