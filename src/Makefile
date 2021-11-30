@@ -39,7 +39,7 @@ ifeq (${exif},1)
 		exif_nikon.c
 endif
 
-ifneq (${verscmp},1)
+ifndef HAVE_STRVERSCMP
 	TARGETS += strverscmp.c
 endif
 

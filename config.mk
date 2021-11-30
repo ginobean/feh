@@ -1,6 +1,9 @@
 PACKAGE ?= feh
 VERSION ?= ${shell git describe --dirty}
 
+# only intended for Darwin, Linux, and other Unix-like systems..
+UNAME_S := $(shell uname -s)
+
 app ?= 0
 curl ?= 1
 debug ?= 0
@@ -70,9 +73,16 @@ ifeq (${mkstemps},1)
 	CFLAGS += -DHAVE_MKSTEMPS
 endif
 
-ifeq (${verscmp},1)
+ifeq ($(UNAME_S), Linux)
 	CFLAGS += -DHAVE_STRVERSCMP
 endif
+
+# this setting seems to be necessary in order for mkdtemp(),  et al.,
+# to be declared correctly in Mac OSX's header files..
+ifeq ($(UNAME_S), Darwin)
+	CFLAGS += -D_DARWIN_C_SOURCE
+endif
+
 
 ifeq (${xinerama},1)
 	CFLAGS += -DHAVE_LIBXINERAMA
