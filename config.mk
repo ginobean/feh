@@ -84,13 +84,13 @@ ifeq ($(UNAME_S), Darwin)
 endif
 
 
-ifeq (${xinerama},1)
-	CFLAGS += -DHAVE_LIBXINERAMA
-	LDLIBS += -lXinerama
-	MAN_XINERAMA = enabled
-else
+# ifeq (${xinerama},1)
+# 	CFLAGS += -DHAVE_LIBXINERAMA
+# 	LDLIBS += -lXinerama
+# 	MAN_XINERAMA = enabled
+# else
 	MAN_XINERAMA = disabled
-endif
+#endif
 
 ifeq (${exif},1)
 	CFLAGS += -DHAVE_LIBEXIF
